@@ -11,6 +11,8 @@ import { Team } from "./components/Team";
 import JsonData from "./data/data.json";
 import SmoothScroll from "smooth-scroll";
 import "./App.css";
+// Correct import for default export
+import UploadCSV from './components/UploadCSV';
 
 // New SignIn component
 import { SignIn } from "./components/SignIn";
@@ -22,6 +24,7 @@ export const scroll = new SmoothScroll('a[href*="#"]', {
 
 const App = () => {
   const [landingPageData, setLandingPageData] = useState({});
+
   useEffect(() => {
     setLandingPageData(JsonData);
   }, []);
@@ -45,6 +48,7 @@ const App = () => {
           }
         />
         <Route path="/signin" element={<SignIn />} />
+        <Route path="/uploadcsv" element={<UploadCSV />} />
       </Routes>
     </Router>
   );

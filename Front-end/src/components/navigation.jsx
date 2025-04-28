@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from 'react-router-dom';
 
-
 export const Navigation = (props) => {
   return (
     <nav id="menu" className="navbar navbar-default navbar-fixed-top">
@@ -60,22 +59,18 @@ export const Navigation = (props) => {
               </a>
             </li>
             <li>
-              <a href="#contact" className="page-scroll">
+              <Link to="/uploadcsv" style={{ textDecoration: 'none' }}>
                 Contact
-              </a>
+              </Link>
             </li>
             <li>
-          <Link to="/signin" style={{ textDecoration: 'none' }}>
-            Sign In
-          </Link>
-        </li>
+              <Link to="/signin" style={{ textDecoration: 'none' }}>
+                Sign In
+              </Link>
+            </li>
           </ul>
         </div>
       </div>
     </nav>
   );
 };
-
-
-
-
