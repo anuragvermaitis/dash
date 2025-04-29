@@ -28,9 +28,9 @@ users_collection = db['users']
 JWT_SECRET = 'your_jwt_secret_here'  # Change this in production
 JWT_ALGORITHM = 'HS256'
 
-# --- Gmail SMTP Settings (FREE) ---
+# --- Gmail SMTP Settings ---
 EMAIL_ADDRESS = "your_gmail@gmail.com"   # Replace with your Gmail
-EMAIL_PASSWORD = "your_gmail_app_password"  # Use Gmail App Passwords, not real password!
+EMAIL_PASSWORD = "your_gmail_app_password"  # Use Gmail App Passwords
 
 # --- Helper Functions ---
 def send_otp_email(receiver_email, otp):
@@ -63,13 +63,9 @@ def signup():
     if existing_user:
         return jsonify({"error": "User already exists"}), 400
 
-    # Hash password
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
-
-    # Generate OTP
     otp = str(random.randint(100000, 999999))
 
-    # Save user with is_verified = False
     users_collection.insert_one({
         'email': email,
         'password': hashed_password,
@@ -77,9 +73,7 @@ def signup():
         'is_verified': False
     })
 
-    # Send OTP email
     send_otp_email(email, otp)
-
     return jsonify({"message": "OTP sent to your email. Please verify."}), 200
 
 @app.route('/verify-otp', methods=['POST'])
@@ -118,7 +112,7 @@ def signin():
     else:
         return jsonify({"error": "Incorrect password"}), 400
 
-# --- Cleaning Data ---
+# --- Data Cleaning ---
 def clean_data(df):
     df_cleaned = df.copy()
     for col in df_cleaned.select_dtypes(include=['object']).columns:
@@ -131,38 +125,54 @@ def clean_data(df):
             df_cleaned[col] = df_cleaned[col].fillna(df_cleaned[col].mode()[0])
     return df_cleaned
 
-# --- Upload Route ---
+# --- Upload & Filter API with Graph ---
 @app.route('/upload', methods=['POST'])
 def upload_file():
     try:
         if 'file' not in request.files:
             return jsonify({"error": "No file part"}), 400
-        
+
         file = request.files['file']
         if file.filename == '':
             return jsonify({"error": "No selected file"}), 400
 
         df = pd.read_csv(file)
         df_cleaned = clean_data(df)
+
+        # --- Apply filters ---
+        for key, value in request.args.items():
+            if key in df_cleaned.columns:
+                df_cleaned = df_cleaned[df_cleaned[key].astype(str).str.lower() == value.lower()]
+
+        # --- Dynamic filter options ---
+        filter_options = {}
+        for col in df.columns:
+            unique_vals = df[col].dropna().unique()
+            if len(unique_vals) <= 100:
+                filter_options[col] = sorted(map(str, unique_vals))
+
+        # --- Cleaned Data JSON ---
         cleaned_data_json = df_cleaned.to_dict(orient='records')
 
+        # --- Plot graph from first numeric column ---
         numeric_cols = df_cleaned.select_dtypes(include=[np.number]).columns
-        if len(numeric_cols) == 0:
-            return jsonify({"error": "No numeric columns to plot."}), 400
-        
-        fig = px.histogram(df_cleaned, x=numeric_cols[0], title=f"Histogram of {numeric_cols[0]}")
-        img_bytes = pio.to_image(fig, format='png')
-        img_base64 = base64.b64encode(img_bytes).decode()
+        plot_base64 = None
+        if len(numeric_cols) > 0:
+            fig = px.histogram(df_cleaned, x=numeric_cols[0], title=f"Histogram of {numeric_cols[0]}")
+            img_bytes = pio.to_image(fig, format='png')
+            plot_base64 = base64.b64encode(img_bytes).decode()
 
         return jsonify({
             "cleaned_data": cleaned_data_json,
-            "plot_base64": img_base64
+            "plot_base64": plot_base64,
+            "filter_options": filter_options
         })
 
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({"error": str(e)}), 500
 
+# --- Resend OTP ---
 @app.route('/api/send-otp', methods=['POST'])
 def send_otp():
     data = request.json
@@ -171,22 +181,15 @@ def send_otp():
     if not email:
         return jsonify({"error": "Email is required"}), 400
 
-    # Generate OTP
     otp = str(random.randint(100000, 999999))
-
-    # Save OTP to DB (or however you manage it)
     users_collection.update_one(
         {'email': email},
         {'$set': {'otp': otp, 'is_verified': False}},
         upsert=True
     )
-
-    # Send OTP via email
     send_otp_email(email, otp)
-
     return jsonify({"message": f"OTP '{otp}' sent successfully to {email}"}), 200
 
-
-# --- Main ---
+# --- Run App ---
 if __name__ == '__main__':
     app.run(debug=True)
