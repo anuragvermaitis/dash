@@ -18,7 +18,7 @@ export const Navigation = (props) => {
             <span className="icon-bar"></span>{" "}
             <span className="icon-bar"></span>{" "}
           </button>
-          <a className="navbar-brand page-scroll " href="#page-top">
+          <a className="navbar-brand page-scroll" href="#page-top">
             Data Visualization App
           </a>{" "}
         </div>
@@ -33,11 +33,6 @@ export const Navigation = (props) => {
                 Features
               </a>
             </li>
-            {/* <li>
-              <a href="#about" className="page-scroll">
-                About
-              </a>
-            </li> */}
             <li>
               <a href="#services" className="page-scroll">
                 Services
@@ -53,14 +48,8 @@ export const Navigation = (props) => {
                 Testimonials
               </a>
             </li>
-            {/* <li> */}
-              {/* Change Team to Signup */}
-              {/* <Link to="/signup" style={{ textDecoration: 'none' }}>
-                Signup
-              </Link> */}
-            {/* </li> */}
             <li>
-              <Link to="/uploadcsv" style={{ textDecoration: 'none' }}>
+              <Link to="/upload-dataset" style={{ textDecoration: 'none' }}>
                 Upload DataSet
               </Link>
             </li>
