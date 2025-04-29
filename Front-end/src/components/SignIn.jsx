@@ -1,92 +1,215 @@
-import React from 'react';
-import './SignIn.css';
-
-import {MDBContainer, MDBCol, MDBRow, MDBBtn, MDBIcon, MDBInput, MDBCheckbox } from 'mdb-react-ui-kit';
-
+import React, { useState } from 'react';
 
 export const SignIn = () => {
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [enteredOtp, setEnteredOtp] = useState('');
+  const [isOtpVerified, setIsOtpVerified] = useState(false);
+
+  const handleOtpChange = (value, index) => {
+    const updatedOtp = [...otp];
+    updatedOtp[index] = value;
+    setOtp(updatedOtp);
+  };
+
+  const handleSendOtp = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert(`OTP sent to ${email}`);
+        setOtpSent(true);
+      } else {
+        alert(`Failed to send OTP: ${data.message}`);
+      }
+    } catch (error) {
+      alert('Error sending OTP: ' + error.message);
+    }
+  };
+
+  const handleOtpSubmit = async () => {
+    const joinedOtp = otp.join('');
+    try {
+      const response = await fetch('http://localhost:5000/api/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp: joinedOtp }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('OTP Verified!');
+        setEnteredOtp(joinedOtp);
+        setIsOtpVerified(true);
+      } else {
+        alert('Incorrect OTP. Try again.');
+      }
+    } catch (error) {
+      alert('Error verifying OTP: ' + error.message);
+    }
+  };
+
+  const handleSignIn = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/signin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Sign-in successful!');
+        // Redirect or perform further actions here
+      } else {
+        alert('Sign-in failed: ' + data.message);
+      }
+    } catch (error) {
+      alert('Error signing in: ' + error.message);
+    }
+  };
+
+  const handleSignUp = async () => {
+    if (password !== confirmPassword) {
+      alert('Passwords do not match!');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:5000/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('Account created successfully!');
+        setIsSignUp(false);
+        // Redirect or perform further actions here
+      } else {
+        alert('Sign-up failed: ' + data.message);
+      }
+    } catch (error) {
+      alert('Error signing up: ' + error.message);
+    }
+  };
 
   return (
-    <MDBContainer fluid className="p-3 my-5 h-custom">
+    <div style={{ maxWidth: '400px', margin: 'auto', marginTop: '50px' }}>
+      <h2>{isSignUp ? 'Sign Up' : 'Sign In'}</h2>
 
-      <MDBRow>
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        style={{ width: '100%', marginBottom: '10px', padding: '8px' }}
+      />
 
-        <MDBCol col='10' md='6'>
-          <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp" class="img-fluid" alt="Sample " />
-        </MDBCol>
+      {!isSignUp && (
+        <>
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            style={{ width: '100%', marginBottom: '10px', padding: '8px' }}
+          />
+          <button onClick={handleSignIn} style={{ width: '100%', padding: '10px' }}>
+            Login
+          </button>
+          <p style={{ marginTop: '10px' }}>
+            Don't have an account?{' '}
+            <span onClick={() => setIsSignUp(true)} style={{ color: 'blue', cursor: 'pointer' }}>
+              Sign Up
+            </span>
+          </p>
+        </>
+      )}
 
-        <MDBCol col='4' md='6'>
+      {isSignUp && (
+        <>
+          {!otpSent && (
+            <button
+              onClick={handleSendOtp}
+              style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
+            >
+              Send OTP
+            </button>
+          )}
 
-          <div className="d-flex flex-row align-items-center justify-content-center">
+          {otpSent && !isOtpVerified && (
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    type="text"
+                    maxLength="1"
+                    value={digit}
+                    onChange={(e) => handleOtpChange(e.target.value, index)}
+                    style={{
+                      width: '50px',
+                      height: '50px',
+                      fontSize: '20px',
+                      textAlign: 'center',
+                    }}
+                  />
+                ))}
+              </div>
+              <button
+                onClick={handleOtpSubmit}
+                style={{ width: '100%', padding: '10px', marginBottom: '10px' }}
+              >
+                Verify OTP
+              </button>
+            </>
+          )}
 
-            <p className="lead fw-normal mb-0 me-3">Sign in with</p>
+          {isOtpVerified && (
+            <>
+              <input
+                type="password"
+                placeholder="Create Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={{ width: '100%', marginBottom: '10px', padding: '8px' }}
+              />
+              <input
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                style={{ width: '100%', marginBottom: '10px', padding: '8px' }}
+              />
+              <button onClick={handleSignUp} style={{ width: '100%', padding: '10px' }}>
+                Register
+              </button>
+            </>
+          )}
 
-            <MDBBtn floating size='md' tag='a' className='me-2'>
-              <MDBIcon fab icon='facebook-f' />
-            </MDBBtn>
-
-            <MDBBtn floating size='md' tag='a'  className='me-2'>
-              <MDBIcon fab icon='twitter' />
-            </MDBBtn>
-
-            <MDBBtn floating size='md' tag='a'  className='me-2'>
-              <MDBIcon fab icon='linkedin-in' />
-            </MDBBtn>
-
-          </div>
-
-          <div className="divider d-flex align-items-center my-4">
-            <p className="text-center fw-bold mx-3 mb-0">Or</p>
-          </div>
-
-          <MDBInput wrapperClass='mb-4' label='Email address' id='formControlLg' type='email' size="lg"/>
-          <MDBInput wrapperClass='mb-4' label='Password' id='formControlLg' type='password' size="lg"/>
-
-          <div className="d-flex justify-content-between mb-4">
-            <MDBCheckbox name='flexCheck' value='' id='flexCheckDefault' label='Remember me' />
-            <a href="!#">Forgot password?</a>
-          </div>
-
-          <div className='text-center text-md-start mt-4 pt-2'>
-            <MDBBtn className="mb-0 px-5" size='lg'>Login</MDBBtn>
-            <p className="small fw-bold mt-2 pt-1 mb-2">Don't have an account? <a href="#!" className="link-danger">Register</a></p>
-          </div>
-
-        </MDBCol>
-
-      </MDBRow>
-
-      <div className="d-flex flex-column flex-md-row text-center text-md-start justify-content-between py-4 px-4 px-xl-5 bg-primary">
-
-        <div className="text-white mb-3 mb-md-0">
-          Copyright © 2020. All rights reserved.
-        </div>
-
-        <div>
-
-          <MDBBtn tag='a' color='none' className='mx-3' style={{ color: 'white' }}>
-            <MDBIcon fab icon='facebook-f' size="md"/>
-          </MDBBtn>
-
-          <MDBBtn tag='a' color='none' className='mx-3' style={{ color: 'white'  }}>
-            <MDBIcon fab icon='twitter' size="md"/>
-          </MDBBtn>
-
-          <MDBBtn tag='a' color='none' className='mx-3' style={{ color: 'white'  }}>
-            <MDBIcon fab icon='google' size="md"/>
-          </MDBBtn>
-
-          <MDBBtn tag='a' color='none' className='mx-3' style={{ color: 'white'  }}>
-            <MDBIcon fab icon='linkedin-in' size="md"/>
-          </MDBBtn>
-
-        </div>
-
-      </div>
-
-    </MDBContainer>
+          <p style={{ marginTop: '10px' }}>
+            Already have an account?{' '}
+            <span onClick={() => setIsSignUp(false)} style={{ color: 'blue', cursor: 'pointer' }}>
+              Sign In
+            </span>
+          </p>
+        </>
+      )}
+    </div>
   );
-}
-
-
-  
+};

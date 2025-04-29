@@ -1,15 +1,79 @@
-.divider:after,
-.divider:before {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: #eee;
-}
-.h-custom {
-  height: calc(100% - 73px);
-}
-@media (max-width: 450px) {
-  .h-custom {
+/* SignIn.css */
+body, html {
   height: 100%;
-  }
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background: #f0f2f5;
+}
+
+.signin-container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.signin-box {
+  background: white;
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  width: 100%;
+  max-width: 400px;
+}
+
+.signin-box h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.signin-box input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.signin-box button {
+  width: 100%;
+  padding: 12px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.signin-box button:hover {
+  background-color: #45a049;
+}
+
+.signin-box p {
+  text-align: center;
+  margin-top: 15px;
+}
+
+.signin-box span {
+  color: blue;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.otp-inputs {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 15px;
+}
+
+.otp-inputs input {
+  width: 50px;
+  height: 50px;
+  text-align: center;
+  font-size: 22px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }

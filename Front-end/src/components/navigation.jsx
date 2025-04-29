@@ -18,8 +18,8 @@ export const Navigation = (props) => {
             <span className="icon-bar"></span>{" "}
             <span className="icon-bar"></span>{" "}
           </button>
-          <a className="navbar-brand page-scroll" href="#page-top">
-            React Landing Page
+          <a className="navbar-brand page-scroll " href="#page-top">
+            Data Visualization App
           </a>{" "}
         </div>
 
@@ -33,11 +33,11 @@ export const Navigation = (props) => {
                 Features
               </a>
             </li>
-            <li>
+            {/* <li>
               <a href="#about" className="page-scroll">
                 About
               </a>
-            </li>
+            </li> */}
             <li>
               <a href="#services" className="page-scroll">
                 Services
@@ -53,14 +53,15 @@ export const Navigation = (props) => {
                 Testimonials
               </a>
             </li>
-            <li>
-              <a href="#team" className="page-scroll">
-                Team
-              </a>
-            </li>
+            {/* <li> */}
+              {/* Change Team to Signup */}
+              {/* <Link to="/signup" style={{ textDecoration: 'none' }}>
+                Signup
+              </Link> */}
+            {/* </li> */}
             <li>
               <Link to="/uploadcsv" style={{ textDecoration: 'none' }}>
-                Contact
+                Upload DataSet
               </Link>
             </li>
             <li>

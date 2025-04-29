@@ -17,6 +17,10 @@ import UploadCSV from './components/UploadCSV';
 // New SignIn component
 import { SignIn } from "./components/SignIn";
 
+// import SignupForm from './components/upfo';
+// import SigninForm from './components/SigninForm';
+
+
 export const scroll = new SmoothScroll('a[href*="#"]', {
   speed: 1000,
   speedAsDuration: true,
@@ -42,8 +46,8 @@ const App = () => {
               <About data={landingPageData.About} />
               <Services data={landingPageData.Services} />
               <Gallery data={landingPageData.Gallery} />
-              <Testimonials data={landingPageData.Testimonials} />
-              <Team data={landingPageData.Team} />
+              {/* <Testimonials data={landingPageData.Testimonials} /> */}
+              {/* <Team data={landingPageData.Team} /> */}
             </>
           }
         />
